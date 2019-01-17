@@ -2,6 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ee07e8c2-cab2-41ed-bb46-c0ab21165d18" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/config/config.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/migrations/20190115135523-create-user-account.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/index.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/useraccount.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/app.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
@@ -157,16 +161,15 @@
       <workItem from="1546433268766" duration="13118000" />
       <workItem from="1546471037570" duration="4692000" />
       <workItem from="1546547063098" duration="2760000" />
-      <workItem from="1547554188694" duration="25226000" />
+      <workItem from="1547554188694" duration="25504000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="50527000" />
+    <option name="totallyTimeSpent" value="50805000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="823" y="43" width="775" height="793" extended-state="0" />
-    <editor active="true" />
+    <frame x="823" y="43" width="775" height="793" extended-state="1" />
     <layout>
       <window_info content_ui="combo" x="577" y="136" width="246" height="667" id="Project" order="0" type="FLOATING" visible="true" weight="0.26272354" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
