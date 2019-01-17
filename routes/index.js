@@ -6,48 +6,6 @@ const models   = require("../models"),
       bcryptjs = require("bcryptjs");
 
 
-
-
-passport.use('local', new LocalStrategy({
-  usernameField : 'username',
-  passwordField : 'password',
-  passReqToCallback : true
-}, (req, username, password, done) => {
-  
-  process.nextTick(() => {
-    models.UserAccount.find({
-      where : {
-        username : username
-      }
-    }).then((userRecord, error) => {
-      if (error) {
-        console.log('=================== 1 error =====================');
-      return done(error);
-      }
-      else if (userRecord === false) {
-        console.log('============== 2 no userRecord found ================');
-        return done(null, false);
-      }
-      bcryptjs.compare(req.body.password, userRecord.password, (error, compareResult) => {
-        if (compareResult === false) {
-          console.log('================= 3 pw mismatch ====================');
-          return done(null, false);
-        } else if (compareResult) {
-          console.log('=============== 4 successful local strat ==============');
-          return done(null, userRecord); // goes into req.user
-        }
-      })
-    })
-  })
-}));
-
-passport.serializeUser((user, done) => { done(null, user) });
-passport.deserializeUser((user, done) => { done(null, user) });
-
-
-
-
-
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
