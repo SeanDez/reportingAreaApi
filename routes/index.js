@@ -1,9 +1,13 @@
+require('dotenv').load();
 var express = require('express');
 var router = express.Router();
-const models   = require("../models"),
-      passport = require("passport"),
-      LocalStrategy = require("passport-local"),
-      bcryptjs = require("bcryptjs");
+const models          = require("../models"),
+      passport        = require("passport"),
+      // LocalStrategy   = require("passport-local"),
+      bcryptjs        = require("bcryptjs"),
+      jsonWebToken    = require("jsonwebtoken"),
+      controllers     = require("../controllers"),
+      moment = require('moment');
 
 
 /* GET home page. */
@@ -11,18 +15,52 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
+// post a verification check
+router.post('/auth-status', (req, res, next) => {
+  console.log("=============/auth-status================");
+  if (req.cookies) {
+    try {
+      // grab the decoded JwToken. It contains the (user) id
+      const decodedJwt = models.UserAccount.prototype.getJwTokenCookie(req);
+      console.log("------------DECODED JWT-------------");
+      console.log(decodedJwt);
+      if (decodedJwt === null) { // null is explicitly set for this
+        return res.json({ message : 'No Cookie Found' })
+      } else if (decodedJwt.data.userId) {
+        models
+          .UserAccount
+          .findOne({where : {id : decodedJwt.data.userId}})
+          .then(userRecord => {
+            if (!userRecord) {
+              console.log("=============NO USER FOUND=========");
+              return res.json({error : "no user found"});
+            } else if (userRecord) {
+              console.log("=============userRecord============");
+              console.log(userRecord);
+              return res.json({userRecord : userRecord});
+            }
+          });
+      }
+    } catch (error) {
+      console.log("===========ERROR===========");
+      console.log(error);
+    }
+  } else res.json({ error : 'No Cookie Detected' })
+  
+  
 
+});
 
-// find the user.
-  // If none, create and then authenticate
 router.post('/sign-up', (req, res, next) => {
+
+  // find a user with this username
   models.UserAccount.findOne({ where : { username : req.body.username }})
   .then(userRecord => {
-    console.log("inside first .then()");
     const hashedPassword = bcryptjs.hashSync(req.body.password, 10);
     console.log(userRecord);
+    
+    // sign up new user
     if (!userRecord) {
-      console.log("inside if !userRecord");
       models.UserAccount.create({
         username : req.body.username,
         password : hashedPassword
@@ -30,21 +68,21 @@ router.post('/sign-up', (req, res, next) => {
       .then(userRecord => {
       console.log("----------- User Created ------------");
       console.log(userRecord);
+      // set res.cookie() header to persist his session until logout
+        models.UserAccount.prototype.setJwTokenCookie(res, userRecord.dataValues.id);
+
+      // log the new user in
       passport.authenticate('local', (error, user, info) => {
         if (error) { return next(error); }
-        if (userRecord == false) {
-          console.log("------------ USER RECORD AGAIN ----------");
-          console.log(userRecord);
+        if (userRecord === (null || false || undefined)) {
           return res.json({ "error" : "User data is false" });
         } // should never trigger
   
-        console.log("----------- user object in pp.authenticate ---------");
-        console.log(user); // false means auth failed
         req.logIn(userRecord, error => {
           if (error) return next(error);
           return res.json({ "userInfo" : userRecord });
         })
-        })(req, res, next)
+        })(req, res, next) // for an inner function
       })
     } else if (userRecord) {
         console.log ("user already exists: routes/index.js:39");
@@ -55,14 +93,90 @@ router.post('/sign-up', (req, res, next) => {
   })
 });
 
+
+/////////////// LOG IN / LOG OUT ///////////////
+
 router.post('/log-in', passport.authenticate('local'), (req, res) => {
-  return res.json({ "loggedInUser" : {
-      "id" : req.user.id,
-      "username" : req.user.username
+  // get the user's Id. Then set the cookie with it
+  models.UserAccount.findOne({ where : { username : req.body.username }})
+    .then(userRecord => {
+      console.log("=========userRecord==========");
+      console.log(userRecord);
+  
+      const id = userRecord.dataValues.id;
+      console.log("==========userRecord.id=======");
+      console.log(id);
+      // evaluates to res.cookie('jwTokenCookie', signedToken)
+      models.UserAccount.prototype.setJwTokenCookie(res, id);
+      
+      return res.json({
+        id : userRecord.dataValues.id,
+        username : userRecord.dataValues.username
+      })
+    });
+});
+
+router.post('/log-out', (req, res, next) => {
+  req.logOut(req.body.username);
+  const jwTokenCookie = models.UserAccount.prototype.deleteJwTokenCookie(req);
+  
+  if (jwTokenCookie.data.userId === (null || false || undefined)) {
+    res.send({
+      id : null,
+      username : null
+    })
+  } else res.send({ error : "cookie is still present on logout" })
+});
+
+
+////////////////// COOOKIE TESTING //////////////////////
+
+// create test cookie
+router.post('/create-cookie', (req, res, send) => {
+  const cookieName = 'jwtTestCookie';
+  const signedToken = jsonWebToken.sign({
+    data: {
+      userId : req.body.userId
     }
+  }, "red scuba steel sheet");
+  const expireDate = new moment().add('10', 'years').toDate();
+  
+  res.cookie(cookieName, signedToken, {
+    httpOnly : true,
+    expires : expireDate
+  });
+  // want to see if not chaining also works
+  res.send({
+    "route" : '/create-cookie',
+    "cookieName" : 'jwtTestCookie',
+    "jwToken/VALUE" : signedToken,
+    "expireDate" : expireDate
   })
 });
 
+// check cookie
+router.post('/check-cookie', (req, res, send) => {
+  const decodedJwt = jsonWebToken.verify(req.cookies.jwtTestCookie, 'red scuba steel sheet');
+  
+  console.log("============CHECK req.cookies.cookieName==========");
+  console.log(req.cookies.cookieName);
+  res.send({
+    route : '/check-cookie',
+    name : 'jwtTestCookie (hardcoded)', // because the backend will ask specifically for a cookie with this name
+    value : req.cookies.jwtTestCookie,
+    decodedValue :  decodedJwt
+  })
+});
+
+// delete cookie
+router.post('/clear-cookie', (req, res, next) => {
+  res.clearCookie('jwtTestCookie')
+  .send({
+    name : 'jwtTestCookie',
+    payload : req.cookies.jwtTestCookie || null
+      // should short circuit evaluate to null on successful clearance
+  })
+});
 
 
 module.exports = router;

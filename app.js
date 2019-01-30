@@ -10,6 +10,9 @@ const passport      = require("passport"),
       models        = require("./models"),
       bcryptjs      = require("bcryptjs");
 
+
+
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
@@ -29,6 +32,17 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Methods', 'POST, PUT, PATCH');
+    return res.status(200).json({});
+  }
+  next();
+});
+
+// must be BELOW any app.uses (including my CORS policy)
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
