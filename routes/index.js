@@ -46,9 +46,6 @@ router.post('/auth-status', (req, res, next) => {
       console.log(error);
     }
   } else res.json({ error : 'No Cookie Detected' })
-  
-  
-
 });
 
 router.post('/sign-up', (req, res, next) => {

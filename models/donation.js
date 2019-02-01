@@ -9,10 +9,14 @@ module.exports = (sequelize, DataTypes) => {
     isRecurring: DataTypes.BOOLEAN,
     countryLivedIn: DataTypes.STRING,
     notes: DataTypes.STRING,
-    x : DataTypes.FOREIGNKEYS
   }, {});
   Donation.associate = function(models) {
     // associations can be defined here
+  };
+  Donation.getTotalDonationsByMonth = (donationData) => {
+    // setup date containers
+
+    // Donation.mergeRecordsByMonth
   };
   return Donation;
 };

@@ -15,6 +15,7 @@ const passport      = require("passport"),
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+const reportsRouter = require('./routes/reports');
 
 var app = express();
 
@@ -45,6 +46,7 @@ app.use((req, res, next) => {
 // must be BELOW any app.uses (including my CORS policy)
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/reports', reportsRouter);
 
 
 passport.use('local', new LocalStrategy({
