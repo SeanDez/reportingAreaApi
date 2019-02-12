@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     amountDonated: DataTypes.DECIMAL(8, 2),
     paymentType: DataTypes.STRING,
     isRecurring: DataTypes.BOOLEAN,
-    countryLivedIn: DataTypes.STRING,
+    // countryLivedIn: DataTypes.STRING, // removed in migration
     notes: DataTypes.STRING,
   }, {});
   Donation.associate = function(models) {
