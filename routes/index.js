@@ -175,6 +175,11 @@ router.post('/clear-cookie', (req, res, next) => {
   })
 });
 
+// cold-start a slow starting heroku server
+router.get('/cold-start', (req, res, next) => {
+  res.send({ message : "Server started. Backend can now receive requests." })
+});
+
 
 module.exports = router;
 
