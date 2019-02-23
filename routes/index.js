@@ -1,4 +1,4 @@
-require('dotenv').load();
+const dotenv = require('dotenv').config({ debug: process.env.DEBUG });
 var express = require('express');
 var router = express.Router();
 const models          = require("../models"),
@@ -7,7 +7,10 @@ const models          = require("../models"),
       bcryptjs        = require("bcryptjs"),
       jsonWebToken    = require("jsonwebtoken"),
       controllers     = require("../controllers"),
-      moment = require('moment');
+      moment = require('moment'),
+      encryptor = require('simple-encryptor')(process.env.simpleEncryptorSecret);
+
+console.log(dotenv, `=====dotenv=====`);
 
 
 /* GET home page. */
@@ -131,9 +134,11 @@ router.post('/log-out', (req, res, next) => {
 // create test cookie
 router.post('/create-cookie', (req, res, send) => {
   const cookieName = 'jwtTestCookie';
+  const encryptedUserId = encryptor.encrypt(req.body.userId);
+  
   const signedToken = jsonWebToken.sign({
     data: {
-      userId : req.body.userId
+      userId : encryptedUserId
     }
   }, "red scuba steel sheet");
   const expireDate = new moment().add('10', 'years').toDate();
@@ -146,22 +151,25 @@ router.post('/create-cookie', (req, res, send) => {
   res.send({
     "route" : '/create-cookie',
     "cookieName" : 'jwtTestCookie',
-    "jwToken/VALUE" : signedToken,
-    "expireDate" : expireDate
+    "jwToken/value" : signedToken,
+    "expireDate" : expireDate,
+    "encrypted userId" : encryptedUserId
   })
 });
 
 // check cookie
 router.post('/check-cookie', (req, res, send) => {
-  const decodedJwt = jsonWebToken.verify(req.cookies.jwtTestCookie, 'red scuba steel sheet');
+  const decodedJwt = jsonWebToken.verify(req.cookies.jwtTestCookie, process.env.jwtSecret);
+  const decryptedUserId = encryptor.decrypt(decodedJwt.data.userId);
   
-  console.log("============CHECK req.cookies.cookieName==========");
-  console.log(req.cookies.cookieName);
+  console.log(process.env.simpleEncryptorSecret, `=====process.env.simpleEncryptorSecret=====`);
   res.send({
     route : '/check-cookie',
     name : 'jwtTestCookie (hardcoded)', // because the backend will ask specifically for a cookie with this name
     value : req.cookies.jwtTestCookie,
-    decodedValue :  decodedJwt
+    decodedObject :  decodedJwt,
+    directAccessedValue : decodedJwt.data.userId,
+    userIdDecrypted : decryptedUserId
   })
 });
 
