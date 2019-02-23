@@ -8,7 +8,8 @@ const passport      = require("passport"),
       LocalStrategy = require("passport-local"),
       session       = require("express-session"),
       models        = require("./models"),
-      bcryptjs      = require("bcryptjs");
+      bcryptjs      = require("bcryptjs"),
+      helmet = require('helmet');
 
 
 
@@ -27,6 +28,7 @@ app.use(passport.session());
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
+app.use(helmet());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
