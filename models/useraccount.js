@@ -36,14 +36,14 @@ module.exports = function (sequelize, DataTypes) {
     const dateIn10Years = new moment()
       .add(10, "years").toDate();
     
-    return response.cookie('jwTokenCookie', signedToken, {
+    return response.cookie('jwtTestCookie', signedToken, {
       httpOnly: true,
       expires : dateIn10Years
     })
   };
   
   UserAccount.prototype.getJwTokenCookie = request => {
-    const jwtCookie = request.cookies.jwTokenCookie;
+    const jwtCookie = request.cookies.jwtTestCookie;
     if (jwtCookie) {
       const decodedJwt = jsonWebToken.verify(jwtCookie, process.env.jwtSecret);
       return decodedJwt;
@@ -81,8 +81,8 @@ module.exports = function (sequelize, DataTypes) {
   };
   
   UserAccount.prototype.deleteJwTokenCookie = (request) => {
-    if (request.cookies.jwTokenCookie) {
-      res.clearCookie('jwTokenCookie');
+    if (request.cookies.jwtTestCookie) {
+      res.clearCookie('jwtTestCookie');
     }
     const { jwTokenCookie = { data : { userId : null } }
             } = request.cookies; // defaults to this unless receives truthy value

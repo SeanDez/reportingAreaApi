@@ -14,21 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     // associations can be defined here
   };
   
-  Donation.getAllValidRecords = () => {
-    Donation
-      .findAll({
-        where : {
-          amountDonated : {[Sequelize.Op.ne] : null},
-        },
-      })
-      .then(queryObjects => {
-        const queriedRecords = queryObjects
-          .map(currentObject => {
-          return currentObject.dataValues;
-        });
-        res.send(queriedRecords);
-      });
-  };
+  
   
   return Donation;
 };

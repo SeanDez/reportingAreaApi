@@ -71,6 +71,9 @@ passport.use('local', new LocalStrategy({
         console.log('============== 2 no userRecord found ================');
         return done(null, false);
       }
+      
+      console.log(userRecord, `=====userRecord=====`);
+      console.log(req.body, `=====req.body=====`);
       bcryptjs.compare(req.body.password, userRecord.password, (error, compareResult) => {
         if (compareResult === false) {
           console.log('================= 3 pw mismatch ====================');

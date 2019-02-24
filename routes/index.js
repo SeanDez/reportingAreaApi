@@ -62,6 +62,7 @@ router.post('/sign-up', (req, res, next) => {
 /////////////// LOG IN / LOG OUT ///////////////
 
 router.post('/log-in', passport.authenticate('local'), (req, res) => {
+  console.log( `=====/login fired=====`);
   // get the user's Id. Then set the cookie with it
   models.UserAccount.findOne({ where : { username : req.body.username }})
     .then(userRecord => {
@@ -71,7 +72,7 @@ router.post('/log-in', passport.authenticate('local'), (req, res) => {
       const id = userRecord.dataValues.id;
       console.log("==========userRecord.id=======");
       console.log(id);
-      // evaluates to res.cookie('jwTokenCookie', signedToken)
+      // evaluates to res.cookie('jwtTestCookie', signedToken)
       models.UserAccount.prototype.setJwTokenCookie(res, id);
       
       return res.json({

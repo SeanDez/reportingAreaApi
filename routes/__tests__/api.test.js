@@ -86,13 +86,6 @@ test('POST to /create-cookie', done => {
     })
 });
 
-// {
-//   "route" : '/create-cookie',
-//   "cookieName" : 'jwtTestCookie',
-//   "jwToken/VALUE" : signedToken,
-//   "expireDate" : expireDate
-// }
-
 
 
 
