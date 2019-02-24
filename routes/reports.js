@@ -9,28 +9,16 @@ const express      = require("express"),
 
 // this is the reports router
 router.post('/', (req, res, next) => {
+  // check the user's cookie for a signed, decrypted userId match
+  console.log( `=====/reports entered=====`);
+  const verifyResult = models.UserAccount.prototype.verifyUser(req, res);
   
-  if (req.cookies.jwTokenCookie) {
-    const verifiedJwt = jsonWebToken.verify(req.cookies.jwTokenCookie, process.env.jwtSecret);
-    
-    // todo decode verifiedJWT to PRINT the userId
-    // todo run a test matcher on userid in the db
-      // nest the below code on success
+  if (verifyResult.success) {
+    const allRecords = models.Donation.getAllValidRecords();
+    res.send(allRecords)
+  } else if (verifyResult.error) {
+    res.send(verifyResult.error) // back to the front end
   }
-  
-  models.Donation.findAll({
-      where : {
-        amountDonated : { [Sequelize.Op.ne] : null }
-        },
-    })
-      .then(queryObjects => {
-        const queriedRecords = queryObjects.map(currentObject => {
-          return currentObject.dataValues;
-        });
-        res.send(queriedRecords)
-      });
-  // };
-
 });
 
 

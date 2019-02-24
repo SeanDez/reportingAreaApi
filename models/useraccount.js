@@ -2,7 +2,8 @@ require('dotenv').config();
 const bcryptjs = require('bcryptjs'),
       jsonWebToken = require('jsonwebtoken'),
       moment = require('moment'), // won't autocomplete but argument prefixing still works
-      encryptor = require('simple-encryptor')
+      encryptor = require('simple-encryptor')(process.env.simpleEncryptorSecret),
+      _ = require('lodash')
       
 // UserAccount is returned from the wrapper function
 // so module.exports = UserAccount
@@ -48,6 +49,35 @@ module.exports = function (sequelize, DataTypes) {
       return decodedJwt;
     }
     else return null;
+  };
+  
+  UserAccount.prototype.verifyUser = (request, response) => {
+    console.log(`====verifyUser entered======`);
+    const rawCookie = request.cookies;
+    if (!rawCookie || _.isEmpty(rawCookie)){
+      console.log(`====Sending error object======`);
+      response.send({ error : "No user cookie found" });
+    }
+    
+    console.log(rawCookie, `=====rawCookie=====`);
+     // -> .data.userId === encrypted
+    const verifiedCookie = jsonWebToken
+      .verify(rawCookie, process.env.jwtSecret);
+    const decryptedUserId = encryptor.decrypt(verifiedCookie.data.userId);
+    console.log(decryptedUserId, `=====decryptedUserId=====`);
+    
+    // search the db for a userId match. resolve with the dat object if yes. Else reject with an error message
+    UserAccount.findOne({ where : { username : decryptedUserId } })
+      .then(userRecord => {
+        if (!userRecord) {
+          console.log(`====NO USER FOUND======`);
+          return res.json({ error : 'No user found' })
+        } else if (userRecord) {
+          // don't need the user record. just need to run the donation data getter
+          return ({ success : 'User verified' })
+        }
+      })
+      .catch({ error : 'Something went wrong in UserAccount.prototype.verifyUser()' })
   };
   
   UserAccount.prototype.deleteJwTokenCookie = (requestLocal) => {

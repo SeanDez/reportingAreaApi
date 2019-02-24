@@ -13,10 +13,22 @@ module.exports = (sequelize, DataTypes) => {
   Donation.associate = function(models) {
     // associations can be defined here
   };
-  Donation.getTotalDonationsByMonth = (donationData) => {
-    // setup date containers
-
-    // Donation.mergeRecordsByMonth
+  
+  Donation.getAllValidRecords = () => {
+    Donation
+      .findAll({
+        where : {
+          amountDonated : {[Sequelize.Op.ne] : null},
+        },
+      })
+      .then(queryObjects => {
+        const queriedRecords = queryObjects
+          .map(currentObject => {
+          return currentObject.dataValues;
+        });
+        res.send(queriedRecords);
+      });
   };
+  
   return Donation;
 };
