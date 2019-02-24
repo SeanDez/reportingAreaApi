@@ -1,4 +1,4 @@
-require("dotenv").load();
+require("dotenv").config();
 const express      = require("express"),
       router       = express.Router(),
       models       = require("../models"),
@@ -11,7 +11,11 @@ const express      = require("express"),
 router.post('/', (req, res, next) => {
   
   if (req.cookies.jwTokenCookie) {
-    const verifiedJwt = jsonWebToken.verify(req.cookies.jwTokenCookie, 'red scuba steel sheet');
+    const verifiedJwt = jsonWebToken.verify(req.cookies.jwTokenCookie, process.env.jwtSecret);
+    
+    // todo decode verifiedJWT to PRINT the userId
+    // todo run a test matcher on userid in the db
+      // nest the below code on success
   }
   
   models.Donation.findAll({
@@ -21,10 +25,8 @@ router.post('/', (req, res, next) => {
     })
       .then(queryObjects => {
         const queriedRecords = queryObjects.map(currentObject => {
-          // console.log(currentObject.dataValues);
           return currentObject.dataValues;
         });
-        
         res.send(queriedRecords)
       });
   // };

@@ -10,8 +10,6 @@ const models          = require("../models"),
       moment = require('moment'),
       encryptor = require('simple-encryptor')(process.env.simpleEncryptorSecret);
 
-console.log(dotenv, `=====dotenv=====`);
-
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -140,7 +138,7 @@ router.post('/create-cookie', (req, res, send) => {
     data: {
       userId : encryptedUserId
     }
-  }, "red scuba steel sheet");
+  }, process.env.jwtSecret);
   const expireDate = new moment().add('10', 'years').toDate();
   
   res.cookie(cookieName, signedToken, {

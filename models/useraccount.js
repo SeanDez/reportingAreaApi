@@ -1,8 +1,8 @@
-'use strict';
-require('dotenv').load();
+require('dotenv').config();
 const bcryptjs = require('bcryptjs'),
       jsonWebToken = require('jsonwebtoken'),
-      moment = require('moment'); // won't autocomplete but argument prefixing still works
+      moment = require('moment'), // won't autocomplete but argument prefixing still works
+      encryptor = require('simple-encryptor')
       
 // UserAccount is returned from the wrapper function
 // so module.exports = UserAccount
@@ -22,12 +22,14 @@ module.exports = function (sequelize, DataTypes) {
   
     // cookie-setter
   UserAccount.prototype.setJwTokenCookie = function (responseLocal, userId) {
-    // generate a new jwt encoded with userId:
+    const encryptedUserId = encryptor.encrypt(userId);
+    
+    // generate a new jwt encoded with encrypted userId:
     const signedToken = jsonWebToken.sign({
       data: {
-        userId : userId
+        userId : encryptedUserId
       }
-    }, "red scuba steel sheet"); // TODO change this into Env variable
+    }, process.env.jwtSecret);
     
     // pass it into a cookie and respond
     const dateIn10Years = new moment()
@@ -42,7 +44,7 @@ module.exports = function (sequelize, DataTypes) {
   UserAccount.prototype.getJwTokenCookie = requestLocal => {
     const jwtCookie = requestLocal.cookies.jwTokenCookie;
     if (jwtCookie) {
-      const decodedJwt = jsonWebToken.verify(jwtCookie, 'red scuba steel sheet');
+      const decodedJwt = jsonWebToken.verify(jwtCookie, process.env.jwtSecret);
       return decodedJwt;
     }
     else return null;
