@@ -22,7 +22,7 @@ module.exports = function (sequelize, DataTypes) {
   };
   
     // cookie-setter
-  UserAccount.prototype.setJwTokenCookie = function (responseLocal, userId) {
+  UserAccount.prototype.setJwTokenCookie = function (response, userId) {
     const encryptedUserId = encryptor.encrypt(userId);
     
     // generate a new jwt encoded with encrypted userId:
@@ -36,14 +36,14 @@ module.exports = function (sequelize, DataTypes) {
     const dateIn10Years = new moment()
       .add(10, "years").toDate();
     
-    return responseLocal.cookie('jwTokenCookie', signedToken, {
+    return response.cookie('jwTokenCookie', signedToken, {
       httpOnly: true,
       expires : dateIn10Years
     })
   };
   
-  UserAccount.prototype.getJwTokenCookie = requestLocal => {
-    const jwtCookie = requestLocal.cookies.jwTokenCookie;
+  UserAccount.prototype.getJwTokenCookie = request => {
+    const jwtCookie = request.cookies.jwTokenCookie;
     if (jwtCookie) {
       const decodedJwt = jsonWebToken.verify(jwtCookie, process.env.jwtSecret);
       return decodedJwt;
@@ -80,12 +80,12 @@ module.exports = function (sequelize, DataTypes) {
       .catch({ error : 'Something went wrong in UserAccount.prototype.verifyUser()' })
   };
   
-  UserAccount.prototype.deleteJwTokenCookie = (requestLocal) => {
-    if (requestLocal.cookies.jwTokenCookie) {
+  UserAccount.prototype.deleteJwTokenCookie = (request) => {
+    if (request.cookies.jwTokenCookie) {
       res.clearCookie('jwTokenCookie');
     }
     const { jwTokenCookie = { data : { userId : null } }
-            } = requestLocal.cookies; // defaults to this unless receives truthy value
+            } = request.cookies; // defaults to this unless receives truthy value
     return jwTokenCookie;
   };
   

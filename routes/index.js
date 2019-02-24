@@ -16,39 +16,6 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
-// post a verification check
-router.post('/auth-status', (req, res, next) => {
-  console.log("=============/auth-status================");
-  if (req.cookies) {
-    try {
-      // grab the decoded JwToken. It contains the (user) id
-      const decodedJwt = models.UserAccount.prototype.getJwTokenCookie(req);
-      console.log("------------DECODED JWT-------------");
-      console.log(decodedJwt);
-      if (decodedJwt === null) { // null is explicitly set for this
-        return res.json({ message : 'No Cookie Found' })
-      } else if (decodedJwt.data.userId) {
-        models
-          .UserAccount
-          .findOne({where : {id : decodedJwt.data.userId}})
-          .then(userRecord => {
-            if (!userRecord) {
-              console.log("=============NO USER FOUND=========");
-              return res.json({error : "no user found"});
-            } else if (userRecord) {
-              console.log("=============userRecord============");
-              console.log(userRecord);
-              return res.json({userRecord : userRecord});
-            }
-          });
-      }
-    } catch (error) {
-      console.log("===========ERROR===========");
-      console.log(error);
-    }
-  } else res.json({ error : 'No Cookie Detected' })
-});
-
 router.post('/sign-up', (req, res, next) => {
 
   // find a user with this username
